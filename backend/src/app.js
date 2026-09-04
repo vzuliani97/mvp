@@ -15,11 +15,39 @@ import {
   productsRouter
 } from './routes/products.js';
 
+import crypto from 'node:crypto';
+import pinoHttp from 'pino-http';
+import {
+  logger
+} from './logger.js';
+
 export const app = express();
 
 app.disable('x-powered-by');
 
 app.use(helmet());
+
+app.use(
+  pinoHttp({
+    logger,
+
+    genReqId(req, res) {
+      const incomingRequestId =
+        req.headers['x-request-id'];
+
+      const requestId =
+        incomingRequestId ||
+        crypto.randomUUID();
+
+      res.setHeader(
+        'X-Request-Id',
+        requestId
+      );
+
+      return requestId;
+    }
+  })
+);
 
 app.use(
   cors({
