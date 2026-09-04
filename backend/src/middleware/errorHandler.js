@@ -12,6 +12,14 @@ export function errorHandler(
   if (
     error instanceof AppError
   ) {
+    req.log?.warn(
+      {
+        code: error.code,
+        details: error.details
+      },
+      'request_rejected'
+    );
+
     return res
       .status(error.statusCode)
       .json({
@@ -29,7 +37,14 @@ export function errorHandler(
       });
   }
 
-  console.error(error);
+
+  req.log?.error(
+    {
+      err: error
+    },
+    'unexpected_error'
+  );
+
 
   return res
     .status(500)
