@@ -1,0 +1,88 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(230px, 1fr)
+    );
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+}
+
+.quantity {
+  display: block;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+.reserve-row {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  width: 75px;
+  padding: 8px;
+}
+
+button {
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.message {
+  background: white;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #dbe2ea;
+}
+
+.reservations {
+  margin-top: 35px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px;
+  border-bottom:
+    1px solid #e5e7eb;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: .12em;
+}
