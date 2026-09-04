@@ -64,5 +64,24 @@ services:
         condition: service_healthy
 
 
+  backend-test:
+    build:
+      context: ./backend
+      target: test
+
+    profiles:
+      - test
+
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgres://app:app_password@postgres:5432/reservations
+      CORS_ORIGIN: http://localhost:8080
+      LOG_LEVEL: silent
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
 volumes:
   postgres_data:
