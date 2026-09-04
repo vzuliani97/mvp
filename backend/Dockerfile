@@ -5,6 +5,18 @@ WORKDIR /app
 COPY package*.json ./
 
 
+FROM base AS test
+
+ENV NODE_ENV=test
+
+RUN npm ci
+
+COPY src ./src
+COPY tests ./tests
+
+CMD ["npm", "test"]
+
+
 FROM base AS production
 
 ENV NODE_ENV=production
