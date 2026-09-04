@@ -15,6 +15,35 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS reservations (
+  id UUID PRIMARY KEY,
+
+  product_id INTEGER NOT NULL
+    REFERENCES products(id),
+
+  quantity INTEGER NOT NULL
+    CHECK (quantity > 0),
+
+  status VARCHAR(16) NOT NULL
+    DEFAULT 'ACTIVE'
+    CHECK (
+      status IN ('ACTIVE', 'CANCELLED')
+    ),
+
+  created_at TIMESTAMPTZ
+    NOT NULL DEFAULT NOW(),
+
+  cancelled_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS
+  idx_reservations_product_id
+ON reservations(product_id);
+
+CREATE INDEX IF NOT EXISTS
+  idx_reservations_status
+ON reservations(status);
+
 INSERT INTO products (
   name,
   initial_quantity,

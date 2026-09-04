@@ -1,6 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import {
+  reservationsRouter
+} from './routes/reservations.js';
+
+import {
+  errorHandler
+} from './middleware/errorHandler.js';
 
 import { config } from './config.js';
 import { pool } from './db/pool.js';
@@ -46,3 +53,10 @@ app.use(
   '/api/products',
   productsRouter
 );
+
+app.use(
+  '/api/reservations',
+  reservationsRouter
+);
+
+app.use(errorHandler);
