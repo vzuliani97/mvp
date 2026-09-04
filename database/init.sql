@@ -36,7 +36,20 @@ CREATE TABLE IF NOT EXISTS reservations (
   created_at TIMESTAMPTZ
     NOT NULL DEFAULT NOW(),
 
-  cancelled_at TIMESTAMPTZ
+  cancelled_at TIMESTAMPTZ,
+
+CONSTRAINT reservation_cancelled_at_consistency
+CHECK (
+  (
+    status = 'ACTIVE'
+    AND cancelled_at IS NULL
+  )
+  OR
+  (
+    status = 'CANCELLED'
+    AND cancelled_at IS NOT NULL
+  )
+)
 );
 
 CREATE INDEX IF NOT EXISTS

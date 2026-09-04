@@ -5,6 +5,7 @@ import {
 import { z } from 'zod';
 
 import {
+  cancelReservation,
   createReservation,
   listReservations
 } from '../services/reservationService.js';
@@ -31,6 +32,9 @@ const createSchema = z
         .positive()
   })
   .strict();
+
+  const reservationIdSchema =
+  z.string().uuid();
 
 
 reservationsRouter.get(
@@ -115,6 +119,46 @@ reservationsRouter.post(
           }
         });
 
+
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// NUEVO ENDPOINT DE CANCELACIÓN
+reservationsRouter.post(
+  '/:id/cancel',
+  async (req, res, next) => {
+    try {
+      const parsedId =
+        reservationIdSchema.safeParse(
+          req.params.id
+        );
+
+      if (!parsedId.success) {
+        throw new AppError(
+          400,
+          'INVALID_RESERVATION_ID',
+          'Reservation id must be a UUID'
+        );
+      }
+
+      const result =
+        await cancelReservation({
+          reservationId:
+            parsedId.data
+        });
+
+      res.json({
+        data:
+          result.reservation,
+
+        meta: {
+          replayed:
+            result.replayed
+        }
+      });
 
     } catch (error) {
       next(error);

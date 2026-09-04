@@ -245,3 +245,122 @@ export async function createReservation({
     }
   );
 }
+export async function cancelReservation({
+  reservationId
+}) {
+  return withTransaction(
+    async (client) => {
+
+      /*
+       * Solo una reserva ACTIVE puede cambiar a CANCELLED.
+       * Si ya fue cancelada, este UPDATE no modifica nada.
+       */
+      const cancelled =
+        await client.query(
+          `
+            UPDATE reservations
+
+            SET
+              status = 'CANCELLED',
+              cancelled_at = NOW()
+
+            WHERE id = $1
+              AND status = 'ACTIVE'
+
+            RETURNING
+              id,
+              product_id,
+              quantity,
+              status,
+              created_at,
+              cancelled_at
+          `,
+          [reservationId]
+        );
+
+
+      if (cancelled.rowCount === 1) {
+        const reservation =
+          cancelled.rows[0];
+
+
+        const product =
+          await client.query(
+            `
+              UPDATE products
+
+              SET
+                available_quantity =
+                  available_quantity + $1,
+
+                updated_at = NOW()
+
+              WHERE id = $2
+
+              RETURNING
+                name,
+                available_quantity
+            `,
+            [
+              reservation.quantity,
+              reservation.product_id
+            ]
+          );
+
+
+        return {
+          reservation:
+            mapReservation({
+              ...reservation,
+              product_name:
+                product.rows[0].name
+            }),
+
+          replayed: false
+        };
+      }
+
+
+      const existing =
+        await client.query(
+          `
+            SELECT
+              r.id,
+              r.product_id,
+              p.name AS product_name,
+              r.quantity,
+              r.status,
+              r.created_at,
+              r.cancelled_at
+
+            FROM reservations r
+
+            JOIN products p
+              ON p.id = r.product_id
+
+            WHERE r.id = $1
+          `,
+          [reservationId]
+        );
+
+
+      if (existing.rowCount === 0) {
+        throw new AppError(
+          404,
+          'RESERVATION_NOT_FOUND',
+          'Reservation not found'
+        );
+      }
+
+
+      return {
+        reservation:
+          mapReservation(
+            existing.rows[0]
+          ),
+
+        replayed: true
+      };
+    }
+  );
+}
