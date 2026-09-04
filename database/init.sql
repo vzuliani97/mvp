@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS reservations (
       status IN ('ACTIVE', 'CANCELLED')
     ),
 
+    idempotency_key VARCHAR(128)
+  NOT NULL UNIQUE,
+
   created_at TIMESTAMPTZ
     NOT NULL DEFAULT NOW(),
 
