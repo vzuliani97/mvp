@@ -48,10 +48,78 @@ export async function listReservations() {
 
 export async function createReservation({
   productId,
-  quantity
+  quantity,
+  idempotencyKey
 }) {
   return withTransaction(
     async (client) => {
+
+                /*
+        * Si dos requests dicen representar la misma
+        * operación, dejo que uno termine antes de que
+        * el segundo la evalúe.
+        */
+        await client.query(
+        `
+            SELECT pg_advisory_xact_lock(
+            hashtextextended($1, 0)
+            )
+        `,
+        [idempotencyKey]
+        );
+
+                const existing =
+        await client.query(
+            `
+            SELECT
+                r.id,
+                r.product_id,
+                p.name AS product_name,
+                r.quantity,
+                r.status,
+                r.created_at,
+                r.cancelled_at
+
+            FROM reservations r
+
+            JOIN products p
+                ON p.id = r.product_id
+
+            WHERE r.idempotency_key = $1
+            `,
+            [idempotencyKey]
+        );
+
+
+        if (
+        existing.rowCount > 0
+        ) {
+        const reservation =
+            existing.rows[0];
+
+        if (
+            reservation.product_id
+            !== productId
+            ||
+            reservation.quantity
+            !== quantity
+        ) {
+            throw new AppError(
+            409,
+            'IDEMPOTENCY_KEY_REUSED',
+            'Idempotency-Key was already used with different data'
+            );
+        }
+
+        return {
+            reservation:
+            mapReservation(
+                reservation
+            ),
+
+            replayed: true
+        };
+        }
 
       /*
        * Descuento el stock y valido disponibilidad
@@ -133,14 +201,16 @@ export async function createReservation({
               id,
               product_id,
               quantity,
-              status
+              status,
+              idempotency_key
             )
 
             VALUES (
               $1,
               $2,
               $3,
-              'ACTIVE'
+              'ACTIVE',
+              $4
             )
 
             RETURNING
@@ -154,16 +224,24 @@ export async function createReservation({
           [
             id,
             productId,
-            quantity
+            quantity,
+            idempotencyKey
           ]
         );
 
-      return mapReservation({
-        ...inserted.rows[0],
+            return {
+        reservation:
+            mapReservation({
+            ...inserted.rows[0],
 
-        product_name:
-          stockUpdate.rows[0].name
-      });
+            product_name:
+                stockUpdate
+                .rows[0]
+                .name
+            }),
+
+        replayed: false
+        };
     }
   );
 }

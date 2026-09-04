@@ -43,6 +43,7 @@ reservationsRouter.get(
       res.json({
         data: reservations
       });
+
     } catch (error) {
       next(error);
     }
@@ -54,10 +55,14 @@ reservationsRouter.post(
   '/',
   async (req, res, next) => {
     try {
+
+      // Primero valido que el body tenga
+      // producto y cantidad válidos.
       const parsed =
         createSchema.safeParse(
           req.body
         );
+
 
       if (!parsed.success) {
         throw new AppError(
@@ -67,16 +72,50 @@ reservationsRouter.post(
         );
       }
 
-      const reservation =
-        await createReservation(
-          parsed.data
+
+      // Esta key identifica la operación.
+      const idempotencyKey =
+        req.get(
+          'Idempotency-Key'
         );
 
-      res
-        .status(201)
-        .json({
-          data: reservation
+
+      if (
+        !idempotencyKey ||
+        idempotencyKey.length > 128
+      ) {
+        throw new AppError(
+          400,
+          'INVALID_IDEMPOTENCY_KEY',
+          'Idempotency-Key header is required'
+        );
+      }
+
+
+      const result =
+        await createReservation({
+          ...parsed.data,
+          idempotencyKey
         });
+
+
+      res
+        .status(
+          result.replayed
+            ? 200
+            : 201
+        )
+        .json({
+          data:
+            result.reservation,
+
+          meta: {
+            replayed:
+              result.replayed
+          }
+        });
+
+
     } catch (error) {
       next(error);
     }
