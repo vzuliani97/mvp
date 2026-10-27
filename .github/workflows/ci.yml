@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run integration tests against PostgreSQL
+        run: docker compose --profile test run --rm --build backend-test
+
+      - name: Build production images
+        run: docker compose build backend frontend
+
+      - name: Tear down
+        if: always()
+        run: docker compose --profile test down -v
