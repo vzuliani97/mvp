@@ -123,9 +123,8 @@ export async function createReservation({
 
       /*
        * Descuento el stock y valido disponibilidad
-       * en la misma operación para no dejar una
-       * ventana entre leer y actualizar WHERE id = $2 
-              AND available_quantity >= $1.
+       * en la misma operación (WHERE available_quantity >= $1)
+       * para no dejar una ventana entre leer y actualizar.
        */
       const stockUpdate =
         await client.query(
