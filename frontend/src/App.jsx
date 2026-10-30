@@ -26,6 +26,14 @@ function App() {
   const [message, setMessage] =
     useState('');
 
+  const [messageType, setMessageType] =
+    useState('success');
+
+  function notify(text, type = 'error') {
+    setMessage(text);
+    setMessageType(type);
+  }
+
 
   async function refresh() {
     const [
@@ -48,7 +56,7 @@ function App() {
 
   useEffect(() => {
     refresh().catch(() => {
-      setMessage(
+      notify(
         'No fue posible cargar los datos.'
       );
     });
@@ -66,7 +74,7 @@ function App() {
       !Number.isInteger(quantity) ||
       quantity <= 0
     ) {
-      setMessage(
+      notify(
         'Cantidad inválida.'
       );
 
@@ -85,9 +93,7 @@ function App() {
       });
 
 
-      setMessage(
-        'Reserva creada.'
-      );
+      notify('Reserva creada.', 'success');
 
       await refresh();
 
@@ -96,14 +102,14 @@ function App() {
         error.code ===
         'INSUFFICIENT_STOCK'
       ) {
-        setMessage(
+        notify(
           `Inventario insuficiente. Disponible: ${
             error.details
               ?.availableQuantity
           }.`
         );
       } else {
-        setMessage(
+        notify(
           error.message
         );
       }
@@ -122,14 +128,12 @@ function App() {
         reservationId
       );
 
-      setMessage(
-        'Reserva cancelada.'
-      );
+      notify('Reserva cancelada.', 'success');
 
       await refresh();
 
     } catch (error) {
-      setMessage(
+      notify(
         error.message
       );
     }
@@ -165,7 +169,7 @@ function App() {
 
 
       {message && (
-        <div className="message">
+        <div className={`message ${messageType}`}>
           {message}
         </div>
       )}
@@ -199,6 +203,18 @@ function App() {
                     .initialQuantity
                 }
               </strong>
+
+              <div className="stock-bar">
+                <span
+                  style={{
+                    width: `${
+                      (product.availableQuantity /
+                        product.initialQuantity) *
+                      100
+                    }%`
+                  }}
+                />
+              </div>
 
 
               <div className="reserve-row">
@@ -297,10 +313,13 @@ function App() {
                     </td>
 
                     <td>
-                      {
-                        reservation
-                          .status
-                      }
+                      <span
+                        className={`badge ${reservation.status.toLowerCase()}`}
+                      >
+                        {reservation.status === 'ACTIVE'
+                          ? 'Activa'
+                          : 'Cancelada'}
+                      </span>
                     </td>
 
                     <td>
@@ -309,6 +328,7 @@ function App() {
                         === 'ACTIVE'
                         ? (
                           <button
+                            className="secondary"
                             onClick={
                               () =>
                                 cancel(
