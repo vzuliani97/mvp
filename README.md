@@ -1,6 +1,10 @@
-# API de reservas con inventario limitado
+# Reservation Concurrency Prototype
 
-[![CI](https://github.com/vzuliani97/mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/vzuliani97/mvp/actions/workflows/ci.yml)
+*Earlier Node.js concurrency experiment, kept for reference. The featured projects are [Yamesi Core](https://github.com/vzuliani97/yamesi), [OpsCircuit](https://github.com/vzuliani97/opscircuit) and [AtomicTrail](https://github.com/vzuliani97/atomictrail).*
+
+[![CI](https://github.com/vzuliani97/reservation-concurrency-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/vzuliani97/reservation-concurrency-prototype/actions/workflows/ci.yml)
+
+## API de reservas con inventario limitado
 
 Aplicación para reservar productos con inventario limitado. Está pensada para no vender de más cuando llegan solicitudes al mismo tiempo, y para que un reintento no descuente inventario dos veces.
 
@@ -109,3 +113,7 @@ Los errores tienen un formato uniforme:
 ```json
 { "error": { "code": "INSUFFICIENT_STOCK", "message": "Not enough inventory available", "details": { "availableQuantity": 1 } } }
 ```
+
+## Licencia y procedencia
+
+MIT. Proyecto anterior del autor. Algunos cambios posteriores (CI, documentación y correcciones) se hicieron con herramientas de desarrollo asistido por IA y se verificaron con pruebas y CI.
