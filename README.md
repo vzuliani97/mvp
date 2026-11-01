@@ -10,6 +10,12 @@ Aplicación para reservar productos con inventario limitado. Está pensada para 
 
 *English: a reservation API with limited stock. It prevents overselling under concurrent requests and makes retries idempotent. Node.js/Express, PostgreSQL, React and Docker, with integration tests running in CI.*
 
+## Para qué sirve y qué construí
+
+Sirve para reservar productos con poco inventario sin vender de más, aunque muchas personas reserven al mismo tiempo o una red lenta repita la solicitud. Construí todo el repositorio: la API en Express con validación, el descuento de inventario en una sola sentencia SQL, las reservas idempotentes, el frontend en React, Docker Compose y las 6 pruebas de integración que corren en CI contra PostgreSQL.
+
+*English: it reserves low-stock products without overselling under concurrent requests or retries. I built the whole repository: the Express API with validation, the stock decrement in one SQL statement, idempotent reservations, the React frontend, Docker Compose and the 6 integration tests that run in CI against PostgreSQL.*
+
 ## Stack
 
 - **Backend:** Node.js 24, Express 5, Zod (validación), Pino (logs), Helmet
