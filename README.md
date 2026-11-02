@@ -122,4 +122,4 @@ Los errores tienen un formato uniforme:
 
 ## Licencia y procedencia
 
-MIT. Proyecto anterior del autor. Cambios posteriores asistidos por IA y verificados con pruebas y CI.
+MIT. Proyecto anterior del autor.
